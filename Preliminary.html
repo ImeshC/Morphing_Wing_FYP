@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Preliminary Design</title>
+</head>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+<body>
+
+    <h1>Wing and Engine Sizing</h1>
+    <h2>UAVs Classification </h2>
+
+    <input type="checkbox" id="unit1" name="units" value="SI">
+    <label for="unit1">SI Units</label>
+    <input type="checkbox" id="unit2" name="units" value="British">
+    <label for="unit2">British Units</label><br><br>
+
+    <input type="checkbox" id="uav1" name="uav" value="Micro">
+    <label for="uav1">Micro</label><br>
+    <input type="checkbox" id="uav2" name="uav" value="Mini">
+    <label for="uav2">Mini</label><br>
+    <input type="checkbox" id="uav3" name="uav" value="VerySmall">
+    <label for="uav3">Very small</label><br>
+    <input type="checkbox" id="uav4" name="uav" value="Small">
+    <label for="uav4">Small</label><br>
+    <input type="checkbox" id="uav5" name="uav" value="Medium">
+    <label for="uav5">Medium</label><br>
+    <input type="checkbox" id="uav6" name="uav" value="Large">
+    <label for="uav6">Large</label><br>
+    <input type="checkbox" id="uav7" name="uav" value="Tactical">
+    <label for="uav7">Tactical/combat</label><br>
+    <input type="checkbox" id="uav8" name="uav" value="MALE">
+    <label for="uav8">MALE</label><br>
+    <input type="checkbox" id="uav9" name="uav" value="HALE">
+    <label for="uav9">HALE</label><br>
+
+
+    <p class="WTORange"></p>
+
+    <label for="WTO"></label><input type="number" id="WTO" placeholder="Maximum Take Off Weight" value="WTOValue">
+    <output class="WTOUnit"></output><br>
+
+    <label for="VMax"></label><input type="number" id="VMax" placeholder="Maximum Velocity">
+    <output class="VMaxUnit"></output>
+
+    <output>at elevation</output>
+    <label for="Elevation"></label><input type="number" id="Elevation" placeholder="Elevation">
+    <output class="ElevationUnit"></output><br>
+
+    <label for="AR"></label><input type="number" id="AR" placeholder="Aspect Ratio">
+    <output>(5-20)</output><br>
+
+    <label for="e"></label><input type="number" id="e" placeholder="Oswald Efficiency Factor">
+    <output>(0.6-0.9)</output><br>
+
+    <label for="Eta"></label><input type="number" id="Eta" placeholder="Prop Efficiency">
+    <output>(0.6-0.8)</output><br>
+
+    <label for="CD0"></label><input type="number" id="CD0" placeholder="Zero-lift Drag Coefficient">
+    <output>(0.03-0.045)</output>
+
+    <button onclick="calculate()">Calculate</button>
+
+    <p class="KValue"></p>
+    <p class="RhoValue"></p>
+
+    <canvas id="myChart" style="width:100%;max-width:600px"></canvas>
+
+    <script>
+        let a=[];
+        const checkboxes2 = document.querySelectorAll('input[name="units"]');
+        checkboxes2.forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                checkboxes2.forEach(cb => {
+                    if (cb !== this) {
+                        cb.checked = false;
+                    }
+                });
+                if (this.checked) {
+                    a.push(this.value);
+                    if (this.value==="British"){
+                        document.querySelector('.WTOUnit')
+                            .innerHTML ="lb";
+                        document.querySelector('.VMaxUnit')
+                            .innerHTML ="ft/s";
+                        document.querySelector('.ElevationUnit')
+                            .innerHTML ="ft";
+                    }
+                    if (this.value==="SI"){
+                        document.querySelector('.WTOUnit')
+                            .innerHTML ="kg";
+                        document.querySelector('.VMaxUnit')
+                            .innerHTML ="m/s";
+                        document.querySelector('.ElevationUnit')
+                            .innerHTML ="m";
+                    }
+                }
+            });
+        });
+
+        const BritishWeights={Micro:"Weight(lb)<0.55",Mini:"Weight(lb)=0.55-2",VerySmall:"Weight(lb)=2-5",Small:"Weight(lb)=5-55",Medium:"Weight(lb)=55-1,000",Large:"Weight(lb)=10,000-30,000",Tactical:"Weight(lb)=1,000-20,000",MALE:"Weight(lb)=1,000-10,000",HALE:"Weight(lb)>5,000"}
+        const SIWeights={Micro:"Weight(kg)<0.25",Mini:"Weight(kg)=0.25-0.9",VerySmall:"Weight(kg)=0.9-2.25",Small:"Weight(kg)=2.25-25",Medium:"Weight(kg)=25-450",Large:"Weight(kg)=4,500-13,500",Tactical:"Weight(kg)=450-9,000",MALE:"Weight(kg)=450-4,500",HALE:"Weight(kg)>2,250"}
+        const checkboxes1 = document.querySelectorAll('input[name="uav"]');
+        checkboxes1.forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                checkboxes1.forEach(cb => {
+                    if (cb !== this) {
+                        cb.checked = false;
+                    }
+                });
+            if (this.checked) {
+                let x=this.value
+                if(a[a.length-1]==="British"){
+                    document.querySelector('.WTORange')
+                        .innerHTML =BritishWeights[x];
+                }
+                else if(a[a.length-1]==="SI"){
+                    document.querySelector('.WTORange')
+                        .innerHTML =SIWeights[x];
+                }
+            }
+        });
+        });
+
+        function calculate(){
+            const WTOValue=document.getElementById('WTO').value;
+            const VMaxValue=document.getElementById('VMax').value;
+            const ELevationValue=document.getElementById('Elevation').value;
+            const ARValue=document.getElementById('AR').value;
+            const eValue=document.getElementById('e').value;
+            const EtaValue=document.getElementById('Eta').value;
+            const CD0Value=document.getElementById('CD0').value;
+            var K=(1/(3.14*ARValue*eValue));
+            var Rho=((101325*0.0289652)/(8.31446*288.15))*(1-((0.0065*ELevationValue)/(288.15)))**(((9.80665*0.0289652)/(8.31446*0.0065))-1)
+            var Z=Rho/1.225;
+            document.querySelector('.KValue')
+                .innerHTML =`K = ${K}`;
+            document.querySelector('.RhoValue')
+                .innerHTML =`Rho = ${Rho}`;
+
+            const xValues = [];
+            const y1Values= [];
+            generateData1("(EtaValue)/(((0.5*1.225*(VMaxValue)**3*CD0Value)/x)+((2*K)/(Rho*Z*VMaxValue))*x)", 10, 100, 10);
+            new Chart("myChart", {
+                type: "line",
+                data: {
+                    labels: xValues,
+                    datasets: [{
+                        data: y1Values ,
+                        borderColor: "red",
+                    }]
+                },
+                options: {
+                    legend: {display: false}
+                }
+            });
+            function generateData1(value, i1, i2, step = 1) {
+                for (let x = i1; x <= i2; x += step) {
+                    y1Values.push(eval(value));
+                    xValues.push(x);
+                }
+        }}
+    </script>
+</body>
+</html>
