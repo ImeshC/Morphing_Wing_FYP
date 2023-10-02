@@ -82,7 +82,7 @@
                         document.querySelector('.WTOUnit')
                             .innerHTML ="lb";
                         document.querySelector('.VMaxUnit')
-                            .innerHTML ="ft/s";
+                            .innerHTML ="knot";
                         document.querySelector('.ElevationUnit')
                             .innerHTML ="ft";
                     }
@@ -123,43 +123,49 @@
         });
 
         function calculate(){
-            const WTOValue=document.getElementById('WTO').value;
-            const VMaxValue=document.getElementById('VMax').value;
-            const ELevationValue=document.getElementById('Elevation').value;
-            const ARValue=document.getElementById('AR').value;
-            const eValue=document.getElementById('e').value;
-            const EtaValue=document.getElementById('Eta').value;
-            const CD0Value=document.getElementById('CD0').value;
-            var K=(1/(3.14*ARValue*eValue));
-            var Rho=((101325*0.0289652)/(8.31446*288.15))*(1-((0.0065*ELevationValue)/(288.15)))**(((9.80665*0.0289652)/(8.31446*0.0065))-1)
-            var Z=Rho/1.225;
-            document.querySelector('.KValue')
-                .innerHTML =`K = ${K}`;
-            document.querySelector('.RhoValue')
-                .innerHTML =`Rho = ${Rho}`;
+            if(a[a.length-1]==="SI"){
+                const WTOValue=document.getElementById('WTO').value;
+                const VMaxValue=document.getElementById('VMax').value;
+                const ELevationValue=document.getElementById('Elevation').value;
+                const ARValue=document.getElementById('AR').value;
+                const eValue=document.getElementById('e').value;
+                const EtaValue=document.getElementById('Eta').value;
+                const CD0Value=document.getElementById('CD0').value;
+                var K=(1/(3.14*ARValue*eValue));
+                var Rho=((101325*0.0289652)/(8.31446*288.15))*(1-((0.0065*ELevationValue)/(288.15)))**(((9.80665*0.0289652)/(8.31446*0.0065))-1)
+                var Z=Rho/1.225;
+                document.querySelector('.KValue')
+                    .innerHTML =`K = ${K}`;
+                document.querySelector('.RhoValue')
+                    .innerHTML =`Rho = ${Rho}`;
 
-            const xValues = [];
-            const y1Values= [];
-            generateData1("(EtaValue)/(((0.5*1.225*(VMaxValue)**3*CD0Value)/x)+((2*K)/(Rho*Z*VMaxValue))*x)", 10, 100, 10);
-            new Chart("myChart", {
-                type: "line",
-                data: {
-                    labels: xValues,
-                    datasets: [{
-                        data: y1Values ,
-                        borderColor: "red",
-                    }]
-                },
-                options: {
-                    legend: {display: false}
+                const xValues = [];
+                const y1Values= [];
+                generateData1("(EtaValue)/(((0.5*1.225*(VMaxValue)**3*CD0Value)/x)+((2*K)/(Rho*Z*VMaxValue))*x)", 10, 100, 10);
+                new Chart("myChart", {
+                    type: "line",
+                    data: {
+                        labels: xValues,
+                        datasets: [{
+                            data: y1Values ,
+                            borderColor: "red",
+                        }]
+                    },
+                    options: {
+                        legend: {display: false}
+                    }
+                });
+                function generateData1(value, i1, i2, step = 1) {
+                    for (let x = i1; x <= i2; x += step) {
+                        y1Values.push(eval(value));
+                        xValues.push(x);
+                    }
                 }
-            });
-            function generateData1(value, i1, i2, step = 1) {
-                for (let x = i1; x <= i2; x += step) {
-                    y1Values.push(eval(value));
-                    xValues.push(x);
-                }
-        }}
+            }
+            else if(a[a.length-1]==="British"){
+
+            }
+}
     </script>
 </body>
 </html>
